@@ -1,0 +1,817 @@
+Webpack: empaquetador de módulos (convertir codigo de desarollo a código de producción) JS, css, images, fonts
+Babel: Conversion de codigo de jsx a js (para que el navegador lo pueda entender)
+
+De forma casi automática existe: create-react-app que trae ya todos los módulos pre-definidos para pode utilizar en una aplicación react.js (https://github.com/facebook/create-react-app)
+
+Adicionar la carpeta creada : reactjs-openlibrary
+
+Configurar el package.json, node.js configuration through npm: 
+	npm init --yes
+package.json: metainformacion del proyecto
+
+
+Instalar todos los modulos que necesitaré:
+
+-el webpack en si: webpack
+-complemento de webpack (sin este, el anterior no funciona): webpack-cli
+-servidor desarollo: webpack-dev-server
+-conversion de codigo (módulos inician con @): 
+1. modulo ppal de babel: @babel/core
+2. traducir codigo js ultima generación a codigo comprensible por navegador:@babel/preset-env
+3. traducir codigo de react en si: @babel/preset-react
+-Integrar webpack y babel : babel-loader 
+-con archivos: html para copiar de entorno desarollo a produccion: html-webpack-plugin
+-necesito a react: react
+-y a react DOM: react-dom
+-escribiendo codigo react estaré usando sintaxis nueva de javascript "async-await" escribir codigo asincrono como si fuera sincrono: @babel/polyfill
+- todos los módulos que nombro son dependencias de desarrollo: -D
+
+todo unido: 
+	npm install webpack webpack-cli webpack-dev-server @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin react react-dom @babel/polyfill -D
+
+Luego de instalar:
+
+Crear dentro de una carpeta src: (codigo origen)
+index.html
+Crear dentro de una carpeta app: (codigo de javascript)
+index.js (arrancará toda la app de react)
+
+Antes de iniciar: Configurar el webpack
+
+Crear fuera de todo, en la raiz del proyecto, un archivo de configuración: webpack.config.js, .babelrc
+este archivo me define como webpack y babel trabajaran y traduciran respectivamente
+
+en webpack.config.js , exportar configuracion: objeto java script
+	
+	const path= require('path');
+	const HtmlWebpackPlugin = require('html-webpack-plugin');
+	
+	module.exports ={
+		entry: './src/app/index.js',
+		output: {
+			path: path.join(__dirname, 'dist'),
+			filename: 'bundle.js'
+		},
+		devServer:{
+			port: 3000
+		},
+		module:{
+			rules: [
+				{
+					test: /\.js$/,
+					loader: 'babel-loader',
+					exclude: /node_modules/
+				}
+			]
+		},
+		plugins:[
+			new HtmlWebpackPlugin({
+				template: './src/index.html'
+			})
+		]
+		
+	}
+
+Ahora la configuracion de .babelrc
+	
+	{
+		"presets" : [
+			"@babel/preset-env",
+			"@babel/preset-react"
+		]
+	}
+
+Ya está finalizada la configuración del proyecto, ahora a probar:
+ 
+ Pero antes: 
+ Webpack ha sido instalado localmente, es decir, solamente para el proyecto. No ha sido instalado globalmente.
+ Vamos a ejecutar un comando dentro de los scripts de package.json, nos va a permitir ejecutar los módulos que he instalado, desarrollo en este caso -d y luego para abrir el navegador una vez se ejecute: --open.
+	.....
+	"scripts": {
+		"dev": "webpack-dev-server -d --open"
+	},
+	.....
+	
+Luego ejecuto en consola:
+	npm run dev
+
+Ahora, la app:
+
+en el index.html vamos a empezar a hacer lo que queremos ver :
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Page Title</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>React OpenLibrary </title>
+	</head>
+	<body>
+		
+	</body>
+	</html>
+	
+el js no lo necesitmaos llamar, porque al ejecutar el modulo: html-webpack-plugin, este, inyecta el código dentro de html. Es decir, el index.html ya esta implementado a través del módulo, el js correspondiente. (index.js)
+	ver la configuración en webpack.config.js en los objetos en la variable de tipo arreglo: "plugins"
+
+Ahora crearemos un js de prueba en el index.js
+	alert('Works')
+
+Como tambien debo tener en cuenta que el despliegue de mi aplicación puede hacerse en entorno de producción o en un hosting compartido como gitHub pages, debo crear un script relacionado con su despliegue
+agregar en package.json
+	.....
+	"scripts": {
+		"dev": "webpack-dev-server -d --open",
+		"build": "webpack -p"
+	},
+	.....
+
+crea la carpeta "dist" con los archivos: bundle.js y index.html y este es el codigo que al final debe subirse al hosting para que un navegador pueda leerlo (codigo final: bundle.js, minificado y optimizado)
+
+CREANDO EL PROYECTO CON REACT
+
+1. en index.js
+
+	import React from 'react';
+	import ReactDOM from 'react-dom';
+	
+	//Metodo render() nos permite pintar cosas por pantalla
+	//Uso código jsx
+	
+	ReactDOM.render(<h1>Hello World</h1>, document.getElementById('app'))
+	
+	//Debo mandarlo a un html para que se pinte
+	//Creo  un nuevo div que contenga referencia al id en index.html
+	
+index.html
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Page Title</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>React OpenLibrary </title>
+	</head>
+	<body>
+		<div id="app"></div>
+	</body>
+	</html>
+	
+Para desplegar: 
+	npm run dev
+	
+CREAR COMPONENTE
+
+El componente sera creado en index.html. Componente App
+
+	class App extends React.Component{
+		render(){
+			return <h1>App</h1>//lo que quiero pintar en pantalla
+		}
+	}
+
+Luego, en el método render de reactDOM agregar el componente, pintar por pantalla
+
+	ReactDOM.render(
+		<App/>,
+		document.getElementById('app')
+	)
+
+AGREGAR DATOS Y FUNCIONALIDADES
+
+DATOS
+
+Inicialmente crear archivo llamado data.json dentro de src/app/index
+	[
+		{
+			"when": "2 Minutes ago",
+			"who": "John Carter",
+			"description": "Created new account"
+		},
+		{
+			"when": "3 Minutes ago",
+			"who": "James Bond",
+			"description": "Created new account"
+		},
+		{
+			"when": "4 Minutes ago",
+			"who": "Margarita Lopez",
+			"description": "Created new account"
+		}
+	]
+	
+Ahora para pintarlo por pantalla, debo empezar a leerlo. En index.js:
+
+	//disponibles datosimport
+	import './data.json';
+	console.log(data);
+
+Ahora le pasaremos este json al componente.
+Pero antes, como el código está creciendo, vamos a separar los componentes, en este caso nuestro componente llamado App ahora lo pondremos en un nuevo archivo que se llamará igual que el componente: App.js en app/App.js
+
+App.js quedará asi:
+	
+	import React, {Component} from 'react';
+	class App extends Component{
+		render(){
+			return <h1>App</h1>//lo que quiero pintar en pantalla
+		}
+	 }
+	//usarlo en toda la aplicación
+	export default App;
+	
+Luego en index.js, ya no necesito el bloque de código, por lo que lo comento o elimino pero, lo referencio a través de la importación del componente
+
+    import React, {Component} from 'react';
+	import ReactDOM, {render}from 'react-dom';
+    
+    import App from './App';
+    import data from  './data.json';
+	//console.log(data);
+    
+    
+    //Para reemplazar React.Component, puedo importar directamente el componente:
+    //import {Component} from 'react'
+    //lo uso directamente como Component y no React.Component, igual para ReactDOM.render
+   
+    // comento este bloque ya que app/App.js es ahora mi nuevo componente; 
+    //para poder usar este componente y que se reconozca como tal, debo importarlo 
+    //import App from './App';
+    /*  class App extends Component{
+		render(){
+			return <h1>App</h1>//lo que quiero pintar en pantalla
+		}
+     } */
+     
+
+    
+    //Metodo render() nos permite pintar cosas por pantalla
+	//Uso código jsx
+    
+    //agregar componente App creado arriba
+    render(
+        <App/>,
+        document.getElementById('app')
+	)
+
+
+Usaremos la propiedad data="los-datos-del-json" en la función render<App/>
+	....
+	<App data={data}/>,
+	......
+Y para mostrarlo, en el componente: App.js, antes de retornar algo:
+	...
+	render(){
+		console.log(this.props.data)	
+		return <h1>App</h1>//lo que quiero pintar en pantalla
+		}
+	...	
+		
+podemos pasar otros datos, usando la misma funcion render() del index.js:
+
+	render(
+        <App data={data} title='OpenLibrary API'/>,
+        document.getElementById('app')
+	)
+
+Y los uso en el componente para que los muestre:
+	....
+	render(){
+            //console.log(this.props.data)	
+			return <h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+		}
+	.....
+
+CREAR TABLA PARA MOSTRAR LOS DATOS	
+Crearé una tabla usando los estilos de Bootstrap.
+
+1. en index.html copio y pego de la web: https://getbootstrap.com/docs/4.3/getting-started/introduction/
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+2. voy a la App.js (retornar conjunto de div, React solo puede renderizar un componente a la vez)
+	....
+	render(){
+            //console.log(this.props.data)	
+			return (
+                <div className="container p-4">
+                    <h1>{this.props.title}</h1>
+                    <table className="table table-bordered">
+                        <thead>
+                            <tr>
+                                {
+                                    //recorrer la propiedad headings definida en index.js
+                                     this.props.headings.map((heading, i)=> {
+                                        //retornar el valor de esta nueva variable heading que contiene el dato de los headings recorridos
+                                        return <th key={i}>{heading}</th>
+                                    })
+                                }
+                            </tr>
+                        </thead>
+
+                    </table>
+                </div>
+            )  
+            //<h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+		}
+	...	
+por ahora solo he pintado el marco donde irán los datos, ahora necesito pintar los datos en sí.
+En el mismo App.js, dentro de la definicion de mi tabla, declaro el <tbody/>
+	....
+	<tbody>
+        {
+            this.props.data.map((row, j) =>{
+                return <tr key={j}>
+                    <td>{row.when}</td>
+                    <td>{row.who}</td>
+                    <td>{row.description}</td>
+                </tr>
+            })
+        }
+    </tbody>			
+	........
+
+Finalmente, App.js:
+	import React, {Component} from 'react';
+		class App extends Component{
+			render(){
+				//console.log(this.props.data)	
+				return (
+					<div className="container p-4">
+						<h1>{this.props.title}</h1>
+						<table className="table table-bordered">
+							<thead>
+								<tr>
+									{
+										//recorrer la propiedad headings definida en index.js
+										this.props.headings.map((heading, i)=> {
+											//retornar el valor de esta nueva variable heading que contiene el dato de los headings recorridos
+											return <th key={i}>{heading}</th>
+										})
+									}
+								</tr>
+							</thead>
+							<tbody>
+								{
+									this.props.data.map((row, j) =>{
+										return <tr key={j}>
+											<td>{row.when}</td>
+											<td>{row.who}</td>
+											<td>{row.description}</td>
+										</tr>
+									})
+								}
+							</tbody>
+						</table>
+					</div>
+				)  
+				//<h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+			}
+		 }
+		//usarlo en toda la aplicación
+	export default App;
+		
+Ahora, para no tener este montón de código, también crearé los componentes para cada elemento de la tabla, head, el body las filas.....
+
+Dentro de app/Heading.js y app/Row.js
+
+A)
+
+en Heading.js
+
+	import React, {Component} from 'react';
+
+	class Heading extends Component{
+
+		render(){
+			return <th>{this.props.heading}</th>
+		}
+
+	}
+
+	export default Heading;
+
+Para usarlo, iré a App.js
+
+import Heading from './Heading';
+.....
+   <thead>
+        <tr>
+            {
+                //recorrer la propiedad headings definida en index.js
+                this.props.headings.map((heading, i)=> {
+                    //retornar el valor de esta nueva variable heading que contiene el dato de los headings recorridos
+                    //return <th key={i}>{heading}</th>
+                    //Segunda parte: Ahora como mi pedazo de head está en un componente llamado heading, aqui lo llamo
+                    return <Heading key={i} heading={heading}/>
+                })
+            }
+        </tr>
+    </thead>
+....
+		
+Lo mismo para las filas, 
+
+B)
+
+en Row.js
+
+	import React, {Component} from 'react';
+
+	class Heading extends Component{
+
+		render(){
+			return <th>{this.props.heading}</th>
+		}
+
+	}
+
+	export default Heading;
+
+Para usarlo, iré a App.js
+
+
+import Row from './Row';	
+.....	
+  <tbody>
+      {
+          this.props.data.map((row, j) =>{
+              /* return <tr key={j}>
+                  <td>{row.when}</td>
+                  <td>{row.who}</td>
+                  <td>{row.description}</td>
+              </tr> */
+
+              //Segunda parte: Ahora como mi pedazo de body está en un componente llamado Row, aqui lo llamo:
+              return <Row key={j} change={row}/>
+          })
+      }
+  </tbody>
+.......
+
+Como puedo modularizar más cosas, thead and tbody tambien lo puedo poner en componentes
+
+	import React, { Component } from 'react';
+	import Heading from './Heading';
+	import Row from './Row';
+
+	class Headings extends Component {
+		render() {
+			return (
+				<thead>
+					<tr>
+						{
+							//recorrer la propiedad headings definida en index.js
+							this.props.headings.map((heading, i) => {
+								//retornar el valor de esta nueva variable heading que contiene el dato de los headings recorridos
+								//return <th key={i}>{heading}</th>
+
+								//Segunda parte: Ahora como mi pedazo de head está en un componente llamado Heading, aqui lo llamo:
+								return <Heading key={i} heading={heading} />
+							})
+						}
+					</tr>
+				</thead>
+			)
+		}
+	}
+
+	class Rows extends Component {
+		render() {
+			return (
+				<tbody>
+					{
+						this.props.data.map((row, j) => {
+
+							/* return <tr key={j}>
+								<td>{row.when}</td>
+								<td>{row.who}</td>
+								<td>{row.description}</td>
+							</tr> */
+
+							//Segunda parte: Ahora como mi pedazo de body está en un componente llamado Row, aqui lo llamo:
+							return <Row key={j} change={row} />
+						})
+					}
+				</tbody>
+			)
+		}
+
+	}
+
+	class App extends Component {
+
+		render() {
+			console.log(this.props.headings)
+			return (
+				<div className="container p-4">
+					<h1>{this.props.title}</h1>
+					<table className="table table-bordered">
+						<Headings headings={this.props.headings} />
+						<Rows data={this.props.data }/>
+
+					</table>
+				</div>
+			)
+			//<h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+		}
+	}
+	//usarlo en toda la aplicación
+	export default App;
+
+DATOS DE LA API
+
+Reemplazaré los datos fijos y traeré los datos dinámicos o disponibles desde la API de open Library.
+
+Esta es la consulta a la API, de lo que necesito:
+	http://openlibrary.org/recentchanges.json?limit=10
+	
+Se agrega en el componente principal: App.js
+La peticion a la API a través de la propiedad JavaScript Async-Await para el metodo: componentDidMount()
+
+	class App extends Component {
+
+		//Peticion a la API (Cuando el componente es montado)
+		async componentDidMount(){
+			//toma una direccion en internet, retorna un json
+			//codigo asincrono, no sabemos cuando va a tardar, depende de la conexion 
+			//async-await: siguiente peticion f etch tomará algo de tiempo, una vez termine, seguiremos con la siguiente línea de código
+			const response = await fetch('http://openlibrary.org/recentchanges.json?limit=10');
+			console.log(response);
+
+		}
+
+Necesito el json Legible para mostrarlo:
+
+
+		render() {
+			console.log(this.props.headings)
+			return (
+				<div className="container p-4">
+					<h1>{this.props.title}</h1>
+					<table className="table table-bordered">
+						<Headings headings={this.props.headings} />
+						<Rows data={this.props.data }/>
+
+					</table>
+				</div>
+			)
+			//<h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+		}
+	}
+	//usarlo en toda la aplicación
+	export default App;
+
+ 
+Debo importar en el index.js:
+    import "@babel/polyfill";
+
+Para poder usar la funcionalidad de async-await sin problema
+
+Transformo  la respuesta a json para que sea legible:
+
+........
+	async componentDidMount(){
+        //toma una direccion en internet, retorna un json
+        //codigo asincrono, no sabemos cuando va a tardar, depende de la conexion 
+        //async-await: siguiente peticion f etch tomará algo de tiempo, una vez termine, seguiremos con la siguiente línea de código
+        const response = await fetch('http://openlibrary.org/recentchanges.json?limit=10');
+        //console.log(response);
+        const data = await response.json();
+        console.log(data);
+    }
+.......	
+
+Voy a ver separado todo el json de la forma que deseo visualizar através de la función formatData()
+
+.......
+	class App extends Component {
+
+		//Peticion a la API (Cuando el componente es montado)
+		async componentDidMount(){
+			//toma una direccion en internet, retorna un json
+			//codigo asincrono, no sabemos cuando va a tardar, depende de la conexion 
+			//async-await: siguiente peticion f etch tomará algo de tiempo, una vez termine, seguiremos con la siguiente línea de código
+			const response = await fetch('http://openlibrary.org/recentchanges.json?limit=10');
+			//console.log(response);
+			const data = await response.json();
+			const formatData = this.formatData(data);
+			console.log(formatData);
+		}
+
+		formatData(data){
+			return data.map((data, i)=>{
+				return{
+					"when":data.timestamp,
+					"who":data.author.key,
+					"description":data.comment
+				}
+			});
+		}
+
+
+		render() {
+			console.log(this.props.headings)
+			return (
+				<div className="container p-4">
+					<h1>{this.props.title}</h1>
+					<table className="table table-bordered">
+						<Headings headings={this.props.headings} />
+						<Rows data={this.props.data }/>
+
+					</table>
+				</div>
+			)
+			//<h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+		}
+	}
+.......
+
+Como deseo ver el formato de fecha como "x time ago" y no como un timestamp, importo la libreria timeago.js
+
+npm install timeago.js
+
+
+La importo en mi proyecto y modifico los formatData correspondientes para mostrar la fecha timestamp como un time ago(App.js)
+
+
+		import React, { Component } from 'react';
+		import Heading from './Heading';
+		import Row from './Row';
+
+		import { format } from 'timeago.js';
+		//const timeagoInstance = timeago();
+
+		class Headings extends Component {
+			render() {
+				return (
+					<thead>
+						<tr>
+							{
+								//recorrer la propiedad headings definida en index.js
+								this.props.headings.map((heading, i) => {
+									//retornar el valor de esta nueva variable heading que contiene el dato de los headings recorridos
+									//return <th key={i}>{heading}</th>
+
+									//Segunda parte: Ahora como mi pedazo de head está en un componente llamado Heading, aqui lo llamo:
+									return <Heading key={i} heading={heading} />
+								})
+							}
+						</tr>
+					</thead>
+				)
+			}
+		}
+
+		class Rows extends Component {
+			render() {
+				return (
+					<tbody>
+						{
+							this.props.data.map((row, j) => {
+
+								/* return <tr key={j}>
+									<td>{row.when}</td>
+									<td>{row.who}</td>
+									<td>{row.description}</td>
+								</tr> */
+
+								//Segunda parte: Ahora como mi pedazo de body está en un componente llamado Row, aqui lo llamo:
+								return <Row key={j} change={row} />
+							})
+						}
+					</tbody>
+				)
+			}
+
+		}
+
+		class App extends Component {
+
+			//Peticion a la API (Cuando el componente es montado)
+			async componentDidMount(){
+				//toma una direccion en internet, retorna un json
+				//codigo asincrono, no sabemos cuando va a tardar, depende de la conexion 
+				//async-await: siguiente peticion f etch tomará algo de tiempo, una vez termine, seguiremos con la siguiente línea de código
+				const response = await fetch('http://openlibrary.org/recentchanges.json?limit=10');
+				//console.log(response);
+				const data = await response.json();
+				const formatData = this.formatData(data);
+				console.log(formatData);
+			}
+
+			formatData(data){
+				return data.map((data, i)=>{
+					return{
+						"when":format(data.timestamp),
+						"who":data.author.key,
+						"description":data.comment
+					}
+				});
+			}
+
+
+			render() {
+				console.log(this.props.headings)
+				return (
+					<div className="container p-4">
+						<h1>{this.props.title}</h1>
+						<table className="table table-bordered">
+							<Headings headings={this.props.headings} />
+							<Rows data={this.props.data }/>
+
+						</table>
+					</div>
+				)
+				//<h1>{this.props.title}</h1>//lo que quiero pintar en pantalla
+			}
+		}
+		//usarlo en toda la aplicación
+		export default App;
+
+
+Voy a pintar los datos formateados en pantalla: 
+
+ESTADO DE COMPONENTE
+A través de un estado de componente. El estado de un componente almacena los datos dentro del componente.
+    async componentDidMount(){...}
+Es quien actualizará el estado de la data
+		....
+	    async componentDidMount(){
+        //toma una direccion en internet, retorna un json
+        //codigo asincrono, no sabemos cuando va a tardar, depende de la conexion 
+        //async-await: siguiente peticion f etch tomará algo de tiempo, una vez termine, seguiremos con la siguiente línea de código
+        const response = await fetch('http://openlibrary.org/recentchanges.json?limit=10');
+        //console.log(response);
+        const data = await response.json();
+        const formatData = this.formatData(data);
+        console.log(formatData);
+        this.setState({data: formatData})
+    }
+	....
+
+Actualizar la app para ver los cambios: no con f5 de forma manual!
+
+Voy a decirle a componentDidMount() que haga la petición a la API cada 1 segundo, React actualizará la tabla automáticamente.
+NOTA: Ahora async estará asociado con la función para la petición de ejecución en el intervalo de tiempo definido
+....
+    //Peticion a la API (Cuando el componente es montado)
+    componentDidMount() {
+
+
+        //Se ejecutará lo contenido en esta función cada 1 segundo.
+        setInterval(async() => {
+
+            //toma una direccion en internet, retorna un json
+            //codigo asincrono, no sabemos cuando va a tardar, depende de la conexion 
+            //async-await: siguiente peticion f etch tomará algo de tiempo, una vez termine, seguiremos con la siguiente línea de código
+            const response = await fetch('http://openlibrary.org/recentchanges.json?limit=10');
+            //console.log(response);
+            const data = await response.json();
+            const formatData = this.formatData(data);
+            console.log(formatData);
+            this.setState({ data: formatData })
+
+        }, 1000);
+    }
+....
+
+ESTILIZANDO:
+
+bootswatch.com  ..... estilo Cosmo (https://bootswatch.com/4/cosmo/bootstrap.min.css)
+
+index.html     
+	<link rel="stylesheet" href="https://bootswatch.com/4/cosmo/bootstrap.min.css">
+	
+Thead: className="table-success":
+App.js	
+	class Headings extends Component {
+		render() {
+			return (
+				<thead className="table-success">
+					<tr>
+						{
+							//recorrer la propiedad headings definida en index.js
+							this.props.headings.map((heading, i) => {
+								//retornar el valor de esta nueva variable heading que contiene el dato de los headings recorridos
+								//return <th key={i}>{heading}</th>
+
+								//Segunda parte: Ahora como mi pedazo de head está en un componente llamado Heading, aqui lo llamo:
+								return <Heading key={i} heading={heading} />
+							})
+						}
+					</tr>
+				</thead>
+			)
+		}
+	}
+	
+VER:
+redux,graphql
+
+
+
+
+

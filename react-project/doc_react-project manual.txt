@@ -1,0 +1,145 @@
+Proyecto: react-project
+
+React:
+
+Nuevo proyecto de node.js
+	npm init --yes
+Crea  el package.json (archivo de node.js) para inicializar la importacion de paquetes
+
+Paquete Live server: servidor que me va a permitir refrescar o ver cambios en vivo
+	npm i live-server
+
+Crear carpeta public
+Crear archivos: index.html y main.css
+index:
+
+	<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>React Project</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    
+</body>
+</html>
+
+en package.json se ha incluido la dependencia de live server
+
+crear mi propio comando en los "scripts:....." en package.json
+	"scripts": {
+		"dev": "live-server public"
+	  },
+Ejecutare el live server que recibe un parametro, este parametro es lo que se le quiere enviar al navegador: lo que enviaré al navegador es la carpeta: public
+
+Ejecutar este comando dev que he creado:
+	npm run dev
+
+Crea el server
+
+Con react.js trabajaremos con un archivo javascript
+Crearé uno nuevo:
+	public/app.js
+	
+	alert('works')
+Debo enlazarlo al index.html
+	<body>
+	....
+    <script src="app.js" charset="utf-8"></script>
+
+Hasta ahora solo tengo Html y java script
+
+Ire a : https://reactjs.org/docs/cdn-links.html
+
+En los CDN: Usar react a partir de scripts, no comprimidos: 
+Desarrollo: mensajes en consola, no comprimidos, no minificados
+Despliegue: comprimidos, minificados
+
+usaremos para desarrollo: 
+
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+lo pegaremos en el index.html, debajo del css
+
+
+Ahora si, iniciando con el react.js:
+
+vamos a re-crear el app.js para que lo entienda react.js
+
+	let template ="<h1>Hello World</h1>";
+
+	ReactDOM.render(
+		template,
+		document.getElementById('app')
+	);
+
+Solamente me esta mostrando lo que le pase por texto en la variable, porque no entiende el jsx
+
+Como transformo entonces de jsx a js?
+
+En react, usare una biblioteca que se llama Babel, que convierte el codigo jsx a js.
+
+crearé una carpeta en el proyecto llamada src:
+
+pasare todos los js que utilizare en el proyecto
+--pasar app.js
+
+archivo bundle.js (instalar paquete)
+
+Otros paquetes para traducir lenguaje js:
+
+Babel: 
+babel-preset-react: complmento babel para traducir jsx
+babel-preset-env: complmento babel para traducir ECMAC y versiones de javascript
+
+npm i babel-cli babel-preset-react babel-preset-env
+
+usando los modulos recien instalados de babel:
+
+voy a usarlos de manera abreviada en el package.json
+
+ "scripts": {
+    "dev": "live-server public",
+    "build": "babel src/app.js --out-file=public/bundle.js --presets=env,react"
+  },
+
+ Archivo de salida convertido:
+	--out-file=public/scripts/bundle.js
+ Los presets que utilizará:
+	--presets=env,react
+ Que "escuche" de manera permanente los cambios:
+	--watch
+
+Ejecutar el comando:
+	npm run build
+	
+como ahora ejecutara en vivo y modificará el jsx a codigo js legible por el navegador, agregamos estos al app.js:
+
+
+		class App extends React.Component {
+			clickHandler(){
+				alert('It works')
+			}
+			render() {
+				return (
+				<button onClick={() => this.clickHandler()}>Click</button>
+				)
+			}
+		}
+
+
+		let template = "<h1>Hello World</h1>";
+
+		ReactDOM.render(
+			<App/>,
+			document.getElementById('app')
+		);
+
+para verlo en la consola, ejecutamos en otra cmd el comando 
+	npm run dev
+
+Lo que se envia al server que hemos creado con el comando dev usando live-server: bundle.js

@@ -1,0 +1,107 @@
+Proyecto:react-firebase-chat
+
+npm init --y
+instalar react y react-dom en el proyecto
+npm i react react-dom
+npm i babel
+Traducir codigo jsx:
+
+	npm i babel-core webpack babel-loader preset babel-preset-react babel-preset-env html-webpack-plugin html-loader webpack-cli webpack-dev-server -D
+
+modulo que traduce:
+	babel-core
+complemento para traducir codigo, integracion babel dentro de webpack: js moderno y jsx
+	webpack babel-loader
+
+los archivos que tomará babel: 
+	preset
+jsx:
+	babel-preset-react
+js moderno:
+	babel-preset-env
+
+modulo que se encargue de tomar el html y procesarlo: convertir js procesado y publicarlo en html (minificado)
+	html-webpack-plugin
+	html-loader
+
+ultimas versiones de webpack pide:
+	webpack-cli
+cambio en el codigo y el server se actualice automáticamente, -D le digo que son dependencias de desarrollo (solo se tomarán en desarrollo):
+	webpack-dev-server -D
+	
+
+Crear el archivo: (encargado de traducir el codigo, minificarlo, tomar todo el codigo como origen y transformarlo a codigo de produccion)
+
+	webpack.config.js
+	
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+
+
+    entry:{ 
+        app: './src/index.js'
+    },
+
+    output: {
+        path: path.resolve(_dirname, 'dist'),
+        filename: 'bundle.js'
+    },
+    
+    devServer:{
+        contentBase: './dist',
+        port: 3000
+    },
+
+    module:{
+        rules: [
+            {
+                test:  /\.js$/,
+                loader: 'babel-loader',
+                exclude: /node_modules/,
+                query:{
+                    presets: ['react', 'env']
+                }
+            },
+            {
+                test : /\.html$/,
+                use: [
+                    {
+                        loader: 'html-loader'
+                    }
+                ]
+            }
+        ]
+    },
+
+    plugins:[ 
+        new HtmlWebpackPlugin({
+            template:'.src/index.html',
+            filename: './index.html'
+        })
+
+    ]
+
+}
+	
+	Aclaraciones
+		rules: primera traducir jsx
+		rules: segunda procesar html
+		
+		devServer: configuracion de servidor en vivo. Contenido el que esta en la carpeta dist (no existe, pero webpack lo creara)
+
+Ahora a guardar y probar:_
+
+agregar en package.json
+
+cuando ejecute el comando dev, ejecuta por mi webpack-dev-server.
+ 
+ "scripts": {
+    "dev": "webpack-dev-server"
+  },
+  
+ ejecutar en la consola
+	npm run dev
+  
+
